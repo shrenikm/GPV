@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-from utility import fanin_initialization
+from ddpg.utility import fanin_initialization
 
 
 class Critic(nn.Module):
@@ -25,7 +25,7 @@ class Critic(nn.Module):
         self.action_dim = action_dim
         self.hidden_dim1 = hidden_dim1
         self.hidden_dim2 = hidden_dim2
-        self.e = self.e
+        self.e = e
 
         self.fc1 = nn.Linear(self.state_dim, self.hidden_dim1)
         self.fc2 = nn.Linear(

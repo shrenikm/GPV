@@ -3,7 +3,7 @@
 import torch
 import torch.nn as nn
 
-from utility import fanin_initialization
+from ddpg.utility import fanin_initialization
 
 
 class Actor(nn.Module):
