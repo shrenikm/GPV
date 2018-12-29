@@ -50,20 +50,21 @@ if type(action_space) is gym.spaces.box.Box:
     action_low = action_space.low
     action_high = action_space.high
 
-action_lim = action_high[0]
+# Limit [-5cm, 5cm] for the fetch environment
+action_lim = 5
 
 experience_replay = ReplayBuffer(MAX_BUFFER_SIZE)
 
 # Initializing ddpg
-ddpg = Ddpg(state_dim, action_dim, action_lim, experience_replay)
+ddpg = Ddpg(state_dim, action_dim, action_lim, action_space, experience_replay)
 her = Her(env, 'final')
 
 for epoch in range(MAX_EPOCHS):
 
-    print('Epoch: {}'.format(epoch + 1))
-    print('-'*50)
-
     for cycle in range(MAX_CYCLES):
+
+        print('Epoch: {} Cycle: {}'.format(epoch + 1, cycle + 1))
+        print('-'*50)
 
         for episode in range(EPISODES_PER_EPOCH):
 
@@ -101,7 +102,8 @@ for epoch in range(MAX_EPOCHS):
                     history.append((achieved_goal, state, action,
                                     np.float32(reward), next_state))
 
-                # Updating the achieved goal. It is updated here as the previous
+                # Updating the achieved goal.
+                # It is updated here as the previous
                 # state achieved goal is required for the history
                 achieved_goal = np.float32(full_state['achieved_goal'])
 

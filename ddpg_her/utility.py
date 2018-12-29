@@ -67,3 +67,34 @@ class OrnsteinUhlenbeckNoise:
                 self.sigma * np.sqrt(self.dt) * np.random.randn(self.size)
         self.x = self.x + dx
         return self.x
+
+
+# Exploration noise
+class ExplorationNoise:
+
+    def __init__(self, action_space):
+
+        # The following assumes a box action space
+        self.action_space = action_space
+        self.action_dim = action_space.shape[0]
+        self.action_low = action_space.low
+        self.action_high = action_space.high
+        self.range = self.action_high - self.action_low
+
+    def sample(self, action):
+
+        choice = np.random.choice(2, 1, p=[0.2, 0.8])
+
+        if choice == 0:
+
+            # Random action within the box
+            action = self.action_space.sample()
+
+        else:
+
+            # Adding normal noise
+            action += np.random.normal(0.0,
+                                       (5.0/100)*self.range,
+                                       self.action_dim)
+
+        return action

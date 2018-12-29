@@ -4,15 +4,16 @@ import torch
 import torch.nn as nn
 import numpy as np
 
-from ddpg.actor import Actor
-from ddpg.critic import Critic
-from ddpg.utility import OrnsteinUhlenbeckNoise
-from ddpg.utility import copy_weights, update_target
+from ddpg_her.actor import Actor
+from ddpg_her.critic import Critic
+from ddpg_her.utility import ExplorationNoise
+from ddpg_her.utility import copy_weights, update_target
 
 
 class Ddpg:
 
-    def __init__(self, state_dim, action_dim, action_lim, experience_replay):
+    def __init__(self, state_dim, action_dim, action_lim, action_space,
+                 experience_replay):
 
         # Set the device
         self.device = torch.device(
@@ -22,6 +23,7 @@ class Ddpg:
         self.state_dim = state_dim
         self.action_dim = action_dim
         self.action_lim = action_lim
+        self.action_space = action_space
         self.experience_replay = experience_replay
 
         # Hyperparameters
@@ -32,7 +34,7 @@ class Ddpg:
         self.minibatch_size = 128
 
         # Noise
-        self.noise = OrnsteinUhlenbeckNoise(size=self.action_dim)
+        self.noise = ExplorationNoise(self.action_space)
 
         # Actor
         self.actor = Actor(state_dim=self.state_dim,
@@ -90,6 +92,10 @@ class Ddpg:
         q = torch.squeeze(
                 self.target_critic.forward(next_state, target_action))
         y_target = reward + self.gamma * q
+
+        # clipping the target
+        y_target = torch.clamp(y_target, min=-1.0/(1.0 - self.gamma), max=0)
+
         y_predicted = torch.squeeze(
                 self.critic.forward(current_state, current_action))
 
@@ -117,5 +123,4 @@ class Ddpg:
         state = torch.from_numpy(state).float().to(self.device)
         action = self.actor.forward(state).cpu().detach().numpy()
 
-        noise_action = action + self.noise.sample() * self.action_lim
-        return noise_action
+        return self.noise.sample(action)
