@@ -4,7 +4,7 @@ import gym
 import torch
 import numpy as np
 
-from ddpg.ddpg import DDPG
+from ddpg.ddpg import Ddpg
 from ddpg.replay_buffer import ReplayBuffer
 from ddpg.utility import save_model
 
@@ -19,7 +19,7 @@ ENV_RENDER = True
 MAX_STEPS = None
 MAX_BUFFER_SIZE = 1000000
 MAX_EPISODES = 5000
-SAVE_RATE = 50
+SAVE_RATE = None
 
 env_name = 'Pendulum-v0'
 model_name = 'pendulum'
@@ -55,13 +55,13 @@ if action_dim == 1:
 experience_replay = ReplayBuffer(MAX_BUFFER_SIZE)
 
 # Initializing ddpg
-ddpg = DDPG(state_dim, action_dim, action_lim, experience_replay)
+ddpg = Ddpg(state_dim, action_dim, action_lim, experience_replay)
 
 for episode in range(MAX_EPISODES):
 
-    observation = env.reset()
-
     print('Episode: {}'.format(episode + 1))
+
+    observation = env.reset()
 
     episode_reward = 0
 
@@ -97,8 +97,7 @@ for episode in range(MAX_EPISODES):
             print('Total reward: {}'.format(episode_reward))
             break
 
-    if (episode % SAVE_RATE == 0) and (SAVE_RATE is not None):
+    if (SAVE_RATE is not None) and (episode % SAVE_RATE == 0):
 
         # Save the model
         save_model(ddpg, save_path, model_name)
-

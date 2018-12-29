@@ -29,7 +29,7 @@ class Ddpg:
         self.critic_lr = 0.001
         self.gamma = 0.99
         self.tau = 0.001
-        self.minibatch_size = 64
+        self.minibatch_size = 128
 
         # Noise
         self.noise = OrnsteinUhlenbeckNoise(size=self.action_dim)
