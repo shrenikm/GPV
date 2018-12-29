@@ -25,10 +25,10 @@ class Ddpg:
         self.experience_replay = experience_replay
 
         # Hyperparameters
-        self.actor_lr = 0.0001
+        self.actor_lr = 0.001
         self.critic_lr = 0.001
-        self.gamma = 0.99
-        self.tau = 0.001
+        self.gamma = 0.98
+        self.tau = 0.05
         self.minibatch_size = 128
 
         # Noise
@@ -105,6 +105,8 @@ class Ddpg:
         self.actor_optimizer.zero_grad()
         loss_actor.backward()
         self.actor_optimizer.step()
+
+    def update_target(self):
 
         # Updating the target networks
         update_target(self.target_actor, self.actor, self.tau)

@@ -19,7 +19,8 @@ else:
 ENV_RENDER = True
 MAX_STEPS = None
 MAX_BUFFER_SIZE = 1000000
-MAX_EPOCH = 200
+MAX_EPOCHS = 200
+MAX_CYCLES = 50
 EPISODES_PER_EPOCH = 16
 SAVE_RATE = 5
 OPTIMIZATION_STEPS = 40
@@ -57,77 +58,84 @@ experience_replay = ReplayBuffer(MAX_BUFFER_SIZE)
 ddpg = Ddpg(state_dim, action_dim, action_lim, experience_replay)
 her = Her(env, 'final')
 
-for epoch in range(MAX_EPOCH):
+for epoch in range(MAX_EPOCHS):
 
     print('Epoch: {}'.format(epoch + 1))
     print('-'*50)
 
-    for episode in range(EPISODES_PER_EPOCH):
+    for cycle in range(MAX_CYCLES):
 
-        print('Episode: {}'.format(episode + 1))
+        for episode in range(EPISODES_PER_EPOCH):
 
-        full_state = env.reset()
-        # Extracting information from the full state
-        observation = np.float32(full_state['observation'])
-        desired_goal = np.float32(full_state['desired_goal'])
-        achieved_goal = np.float32(full_state['achieved_goal'])
+            print('Episode: {}'.format(episode + 1))
 
-        episode_reward = 0
-
-        # History to store all the transitions till the end of the episode
-        history = []
-
-        while True:
-
-            if ENV_RENDER:
-                env.render()
-
-            state = np.concatenate((observation, desired_goal), axis=0)
-            action = ddpg.noisy_action(state)
-
-            full_state, reward, terminal, info = env.step(action)
+            full_state = env.reset()
+            # Extracting information from the full state
             observation = np.float32(full_state['observation'])
-
-            episode_reward += reward
-
-            if not terminal:
-                next_state = np.concatenate((observation, desired_goal),
-                                            axis=0)
-
-                # Appending to the history
-                history.append((achieved_goal, state, action,
-                                np.float32(reward), next_state))
-
-            # Updating the achieved goal. It is updated here as the previous
-            # state achieved goal is required for the history
+            desired_goal = np.float32(full_state['desired_goal'])
             achieved_goal = np.float32(full_state['achieved_goal'])
 
-            if terminal:
+            episode_reward = 0
 
-                print('Total reward: {}'.format(episode_reward))
-                break
+            # History to store all the transitions till the end of the episode
+            history = []
 
-        # Adding to the experience replay (Standard replay)
-        for transition in history:
+            while True:
 
-            # Adding the transition in the replay buffer.
-            # Ignoring the achieved goal
-            ddpg.experience_replay.add(transition[1::])
+                if ENV_RENDER:
+                    env.render()
 
-        # Adding HER transitions
-        her_history = her.add(history)
-        for transition in her_history:
+                state = np.concatenate((observation, desired_goal), axis=0)
+                action = ddpg.noisy_action(state)
 
-            ddpg.experience_replay.add(transition)
+                full_state, reward, terminal, info = env.step(action)
+                observation = np.float32(full_state['observation'])
 
-        if (SAVE_RATE is not None) and (episode % SAVE_RATE == 0):
+                episode_reward += reward
 
-            # Save the model
-            save_model(ddpg, save_path, model_name)
+                if not terminal:
+                    next_state = np.concatenate((observation, desired_goal),
+                                                axis=0)
 
-    print('Optimizing')
-    print('-'*50)
+                    # Appending to the history
+                    history.append((achieved_goal, state, action,
+                                    np.float32(reward), next_state))
 
-    # Training
-    for i in range(OPTIMIZATION_STEPS):
-        ddpg.train()
+                # Updating the achieved goal. It is updated here as the previous
+                # state achieved goal is required for the history
+                achieved_goal = np.float32(full_state['achieved_goal'])
+
+                if terminal:
+
+                    print('Total reward: {}'.format(episode_reward))
+                    break
+
+            # Adding to the experience replay (Standard replay)
+            for transition in history:
+
+                # Adding the transition in the replay buffer.
+                # Ignoring the achieved goal
+                ddpg.experience_replay.add(transition[1::])
+
+            # Adding HER transitions
+            her_history = her.add(history)
+            for transition in her_history:
+
+                ddpg.experience_replay.add(transition)
+
+            if (SAVE_RATE is not None) and (episode % SAVE_RATE == 0):
+
+                # Save the model
+                save_model(ddpg, save_path, model_name)
+
+        print('Optimizing')
+        print('-'*50)
+
+        # Training
+        for i in range(OPTIMIZATION_STEPS):
+            ddpg.train()
+
+        # Updating targets
+        print('Optimizing targets')
+        print('-'*50)
+        ddpg.update_target()
