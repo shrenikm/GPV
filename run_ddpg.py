@@ -12,7 +12,7 @@ from ddpg.utility import save_model
 if torch.cuda.is_available():
     print('GPU available. Using {}'.format(torch.cuda.get_device_name(0)))
 else:
-    print('Using CPU')
+    print('Using CPU.')
 
 # Environment and episode constants
 ENV_RENDER = True
