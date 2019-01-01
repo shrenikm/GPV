@@ -18,11 +18,13 @@ else:
 ENV_RENDER = True
 MAX_STEPS = None
 MAX_BUFFER_SIZE = 1000000
-MAX_EPISODES = 5000
-SAVE_RATE = None
+MAX_EPISODES = 1000
+SAVE_RATE = 20
 
-env_name = 'Pendulum-v0'
-model_name = 'pendulum'
+# env_name = 'Pendulum-v0'
+# model_name = 'pendulum'
+env_name = 'BipedalWalker-v2'
+model_name = 'biped'
 save_path = 'ddpg/models/'
 env = gym.make(env_name)
 

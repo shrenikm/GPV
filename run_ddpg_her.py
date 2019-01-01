@@ -25,8 +25,10 @@ EPISODES_PER_EPOCH = 16
 SAVE_RATE = 5
 OPTIMIZATION_STEPS = 40
 
-env_name = 'FetchPush-v1'
-model_name = 'fetch_push'
+# env_name = 'FetchPush-v1'
+# model_name = 'fetch_push'
+env_name = 'FetchPickAndPlace-v1'
+model_name = 'fetch_pick_and_place'
 save_path = 'ddpg_her/models/'
 env = gym.make(env_name)
 
