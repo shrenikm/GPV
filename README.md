@@ -22,7 +22,7 @@ The OpenAI gym bipedal environment was used to evaluate the results of the algor
 
 The weights of the reconstruction and KL Divergence Loss in the VAE can be tuned to change the behavior of the generated policy. If the reconstruction loss is weighted more, it leads to actions that are more faithful to the DDPG policy. If the KL Divergence loss is weighted more, it leads to more variation in the actions.
 
-The gif below shows the biped running the DDPG policy. The four gifs below that show the biped using the generated policies, all from the same VAE (with different loss weights).
+The gif below shows the biped moving using the DDPG policy. The four gifs below that show the generated policies, all from the same VAE (with different loss weights).
 
 The VAE is seen to generate behavior not seen in the DDPG policy (Like jumping).
 
@@ -36,6 +36,6 @@ The VAE is seen to generate behavior not seen in the DDPG policy (Like jumping).
 </p>
 
 <p align="center">
-<img src="https://media.giphy.com/media/kv86xqY0CnF3fFcI3N/giphy.gif" width="420" />
-<img src="https://media.giphy.com/media/2la36P1kZbePlnljU2/giphy.gif" width="420" /> 
+<img src="https://media.giphy.com/media/ZyGhANkWi9NtiaT4rq/giphy.gif" width="420" />
+<img src="https://media.giphy.com/media/1poXsOUWW97FnHu5S4/giphy.gif" width="420" /> 
 </p>
