@@ -5,31 +5,31 @@ import torch
 import numpy as np
 
 from ddpg.actor import Actor
+from vae.vae_conditional import VAEConditional
 
-# Cuda indication
 use_cuda = torch.cuda.is_available()
 device = torch.device('cuda:0' if use_cuda else 'cpu')
 
 if use_cuda:
     print('GPU available. Using {}'.format(torch.cuda.get_device_name(0)))
 else:
-    print('Using CPU')
+    print('Using CPU.')
 
 # Environment and episode constants
 ENV_RENDER = True
-ENV_SEED = 1
+ENV_SEED = 7
 MAX_EPISODES = 100
-COLLECT_DATA = True
+RECORD_VIDEO = True
 
 env_name = 'BipedalWalker-v2'
 model_name = 'biped'
-load_path = 'ddpg/models/'
-save_path = 'ddpg/data/'
+load_ddpg_path = 'ddpg/models/'
+load_vae_path = 'vae/models/'
 env = gym.make(env_name)
 
-# Data to store
-x = None
-y = None
+# Recording video if required
+if RECORD_VIDEO:
+    env = gym.wrappers.Monitor(env, "results")
 
 state_space = env.observation_space
 action_space = env.action_space
@@ -54,16 +54,20 @@ if action_dim == 1:
     action_low, action_high, action_lim = \
             action_low[0], action_high[0], action_lim[0]
 
-# Loading the actor
+# Initializing and loading the actor
 actor = Actor(state_dim=state_dim,
               action_dim=action_dim,
               action_lim=action_lim)
 actor = actor.to(device)
+actor.load_state_dict(
+        torch.load(load_ddpg_path + model_name + '/' + 'actor.pth'))
 
-# Loading network parameters
-actor.load_state_dict(torch.load(load_path + model_name + '/' + 'actor.pth'))
+# Initializing and loading the vae
+vae = VAEConditional(state_dim=state_dim, action_dim=action_dim)
+vae = vae.to(device)
+vae.load_state_dict(
+        torch.load(load_vae_path + model_name + '/' + 'vae.pth'))
 
-# Evaluating the trained actor
 for episode in range(MAX_EPISODES):
 
     print('Episode: {}'.format(episode + 1))
@@ -80,23 +84,15 @@ for episode in range(MAX_EPISODES):
             env.render()
 
         state = np.float32(observation)
-        action = actor(torch.from_numpy(state).float().to(device))
-        action = action.cpu().detach().numpy()
+        action_ddpg = actor(torch.from_numpy(state).float().to(device))
+        action_ddpg = action_ddpg.cpu().detach().numpy()
 
-        # Storing data
-        if COLLECT_DATA:
+        action_vae = vae.generate(torch.from_numpy(state).float().to(device))
+        action_vae = action_vae.squeeze(0)
+        action_vae = action_vae.cpu().detach().numpy()
 
-            if x is None:
-
-                # Add the first collected data point
-                x = state.reshape(1, state.shape[0])
-                y = action.reshape(1, action.shape[0])
-
-            else:
-
-                # Append
-                x = np.append(x, state.reshape(1, state.shape[0]), axis=0)
-                y = np.append(y, action.reshape(1, action.shape[0]), axis=0)
+        # Setting the action
+        action = action_vae
 
         new_observation, reward, terminal, info = env.step(action)
 
@@ -106,7 +102,3 @@ for episode in range(MAX_EPISODES):
         else:
             next_state = np.float32(new_observation)
             observation = new_observation
-
-# Save data
-if COLLECT_DATA:
-    np.savez(save_path + model_name + '/' + 'data.npz', x, y)

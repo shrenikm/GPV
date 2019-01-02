@@ -25,12 +25,11 @@ else:
 ENV_RENDER = True
 ENV_SEED = 1
 MAX_EPISODES = 100
-COLLECT_DATA = True
 
 env_name = 'BipedalWalker-v2'
 model_name = 'biped'
 load_path = 'ddpg/data/'
-save_path = 'vae/data/'
+save_path = 'vae/models/'
 env = gym.make(env_name)
 
 state_space = env.observation_space
@@ -78,7 +77,7 @@ test_loader = torch.utils.data.DataLoader(test_dataset,
                                           batch_size=batch_size_test)
 
 # Learning parameters
-learning_rate = 0.00001
+learning_rate = 0.001
 max_iter = 20000
 
 iterations_per_epoch = int(num_train / batch_size_train)
@@ -93,7 +92,7 @@ vae = vae.to(device)
 loss_function_decoder = nn.MSELoss()
 
 # Alpha controls the weighing of both the losses
-alpha = 0.01
+alpha = 0.05
 
 # Optimizer
 optimizer = optim.Adam(vae.parameters(), lr=learning_rate, betas=(0.5, 0.999))
