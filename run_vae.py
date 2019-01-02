@@ -92,7 +92,7 @@ vae = vae.to(device)
 loss_function_decoder = nn.MSELoss()
 
 # Alpha controls the weighing of both the losses
-alpha = 0.05
+alpha = 0.001
 
 # Optimizer
 optimizer = optim.Adam(vae.parameters(), lr=learning_rate, betas=(0.5, 0.999))
@@ -128,7 +128,7 @@ for epoch in range(num_epochs):
 
         loss_list.append(loss.item())
 
-        print('Loss (Iteration {0}): {1:.3f}'.format(
+        print('Loss (Iteration {0}): {1:.5f}'.format(
             iteration_count, loss.item()))
 
         loss.backward()

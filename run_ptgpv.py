@@ -19,7 +19,7 @@ else:
 ENV_RENDER = True
 ENV_SEED = 7
 MAX_EPISODES = 100
-RECORD_VIDEO = True
+RECORD_VIDEO = False
 
 env_name = 'BipedalWalker-v2'
 model_name = 'biped'
