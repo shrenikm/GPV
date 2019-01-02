@@ -36,6 +36,6 @@ The VAE is seen to generate behavior not seen in the DDPG policy (Like jumping).
 </p>
 
 <p align="center">
-<img src="https://media.giphy.com/media/t7jzG8lZeBUnzcJeJQ/giphy.gif" width="420" />
-<img src="https://media.giphy.com/media/LqwYMYN8nst2PzkfJL/giphy.gif" width="420" /> 
+<img src="https://media.giphy.com/media/kv86xqY0CnF3fFcI3N/giphy.gif" width="420" />
+<img src="https://media.giphy.com/media/2la36P1kZbePlnljU2/giphy.gif" width="420" /> 
 </p>
