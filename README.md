@@ -39,3 +39,11 @@ The VAE is seen to generate behavior not seen in the DDPG policy (Like jumping).
 <img src="https://media.giphy.com/media/ZyGhANkWi9NtiaT4rq/giphy.gif" width="420" />
 <img src="https://media.giphy.com/media/1poXsOUWW97FnHu5S4/giphy.gif" width="420" /> 
 </p>
+
+## Simultaneous-Training GPV
+
+The GPV implementation may also be used simultaneously, along with the training of the agent. The output of the VAE in this case is used to generate actions that explore.
+
+In the case of DDPG, the output of the VAE is used to generate exploratory actions instead of using Ornstein-Uhlenbeck/Normal noise. The agent training now consists of two steps:
+- Training the RL algorithm: In the case of DDPG, the actor, critic and the corresponding target networks are updated.
+- Training the generative model: In this case the VAE is trained using the minibatch obtained from the experience replay. Initially the VAE output would have a high variance (which enables more exploration). As the training process continues, this variance reduces as the VAE finds a good fit to the policy distribution. Hence exploration reduces when the agent has learned a good policy which is what is required of a good RL algorithm.
