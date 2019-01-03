@@ -81,8 +81,13 @@ for episode in range(MAX_EPISODES):
         episode_reward += reward
 
         if terminal:
+
+            print('Total reward: {}'.format(episode_reward))
             next_state = None
+            break
+
         else:
+
             next_state = np.float32(new_observation)
 
             # Adding to the experience replay
@@ -93,11 +98,6 @@ for episode in range(MAX_EPISODES):
 
         # Training the actor and critic networks
         ddpg.train()
-
-        if terminal:
-
-            print('Total reward: {}'.format(episode_reward))
-            break
 
     if (SAVE_RATE is not None) and (episode % SAVE_RATE == 0):
 
